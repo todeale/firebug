@@ -1,5 +1,7 @@
 /* See license.txt for terms of usage */
 
+/* global FBTrace, NodeList, Function, Node */
+
 // xxxHonza: remove deps on FBL.
 define([
     "firebug/lib/lib",
@@ -110,7 +112,7 @@ DomplateTag.prototype =
         this.vars = oldTag ? copyArray(oldTag.vars) : [];
 
         var attrs = args.length ? args[0] : null;
-        var hasAttrs = typeof(attrs) == "object" && !isTag(attrs);
+        var hasAttrs = typeof(attrs) === "object" && !isTag(attrs);
 
         // Do not clear children, they can be copied from the oldTag.
         //this.children = [];
@@ -134,21 +136,21 @@ DomplateTag.prototype =
             var val = parseValue(args[name]);
             readPartNames(val, this.vars);
 
-            if (name.lastIndexOf("on", 0) == 0)
+            if (name.lastIndexOf("on", 0) === 0)
             {
                 var eventName = name.substr(2);
                 if (!this.listeners)
                     this.listeners = [];
                 this.listeners.push(eventName, val);
             }
-            else if (name[0] == "_")
+            else if (name[0] === "_")
             {
                 var propName = name.substr(1);
                 if (!this.props)
                     this.props = {};
                 this.props[propName] = val;
             }
-            else if (name[0] == "$")
+            else if (name[0] === "$")
             {
                 var className = name.substr(1);
                 if (!this.classes)
@@ -157,7 +159,7 @@ DomplateTag.prototype =
             }
             else
             {
-                if (name == "class" && this.attrs.hasOwnProperty(name))
+                if (name === "class" && this.attrs.hasOwnProperty(name))
                     this.attrs[name] += " " + val;
                 else
                     this.attrs[name] = val;
@@ -266,7 +268,7 @@ DomplateTag.prototype =
             }
             catch (exc)
             {
-                if (exc != StopIteration && FBTrace.DBG_ERRORS)
+                if (exc !== StopIteration && FBTrace.DBG_ERRORS)
                     FBTrace.sysout("domplate; __loop__ EXCEPTION " +
                         (value ? value.name : "no value") + ", " + exc, exc);
 
@@ -300,11 +302,11 @@ DomplateTag.prototype =
                 child.tag.getVarNames(args);
             else if (child instanceof Parts)
             {
-                for (var i = 0; i < child.parts.length; ++i)
+                for (var j = 0; j < child.parts.length; ++i)
                 {
-                    if (child.parts[i] instanceof Variables)
+                    if (child.parts[j] instanceof Variables)
                     {
-                        var name = child.parts[i].names[0];
+                        var name = child.parts[j].names[0];
                         var names = name.split(".");
                         args.push(names[0]);
                     }
@@ -322,7 +324,7 @@ DomplateTag.prototype =
 
         for (var name in this.attrs)
         {
-            if (name != "class")
+            if (name !== "class")
             {
                 var val = this.attrs[name];
                 topBlock.push(',__attr__("', name, '",[');
@@ -361,7 +363,7 @@ DomplateTag.prototype =
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
 
         // <br> element doesn't use end tag.
-        if (this.tagName != "br")
+        if (this.tagName !== "br")
             topBlock.push(',"</', this.tagName, '>"');
 
         if (FBTrace.DBG_DOMPLATE)
@@ -506,10 +508,10 @@ DomplateTag.prototype =
             {
                 var index = arguments[i];
 
-                if (i == 3)
+                if (i === 3)
                     index += offset;
 
-                if (index == -1)  // then walk up the tree
+                if (index === -1)  // then walk up the tree
                     parent = parent.parentNode;
                 else
                     parent = parent.childNodes[index];
@@ -849,7 +851,7 @@ function parseParts(str)
     var parts = [];
 
     var m;
-    while (m = re.exec(str))
+    while (m === re.exec(str))
     {
         var pre = str.substr(index, (re.lastIndex-m[0].length)-index);
         if (pre)
@@ -881,7 +883,7 @@ function parseParts(str)
 
 function parseValue(val)
 {
-    return typeof(val) == 'string' ? parseParts(val) : val;
+    return typeof(val) === 'string' ? parseParts(val) : val;
 }
 
 function parseChildren(args, offset, vars, children)
@@ -980,7 +982,7 @@ function addParts(val, delim, block, info, escapeIt)
 
 function isTag(obj)
 {
-    return (typeof(obj) == "function" || obj instanceof Function) && !!obj.tag;
+    return (typeof(obj) === "function" || obj instanceof Function) && !!obj.tag;
 }
 
 function creator(tag, cons)
@@ -1057,6 +1059,13 @@ FBL.$break = function()
 var Renderer =
 /** @lends Renderer */
 {
+     /**
+      * 
+      * @param {type} args
+      * @param {type} outputs
+      * @param {type} self a reference to the object
+      * @returns {String}
+      */
     renderHTML: function(args, outputs, self)
     {
         try
@@ -1100,8 +1109,8 @@ var Renderer =
 
         var tbody = table.firstChild;
         var localName = after.localName.toLowerCase();
-        var parent = (localName == "tr") ? after.parentNode : after;
-        var referenceElement = (localName == "tr") ? after.nextSibling : null;
+        var parent = (localName === "tr") ? after.parentNode : after;
+        var referenceElement = (localName === "tr") ? after.nextSibling : null;
 
         var firstRow = tbody.firstChild;
         var lastRow = null;
@@ -1131,7 +1140,7 @@ var Renderer =
         if (this.tag.isLoop)
         {
             var node = firstRow.parentNode.firstChild;
-            for (; node && node != firstRow; node = node.nextSibling)
+            for (; node && node !== firstRow; node = node.nextSibling)
                 ++offset;
         }
 
@@ -1148,7 +1157,7 @@ var Renderer =
     {
         return this.insertNode(
                 args, before.ownerDocument,
-                function beforeInserter(frag) {
+                function(frag) {
                     before.parentNode.insertBefore(frag, before);
                 },
                 self);
@@ -1212,17 +1221,17 @@ var Renderer =
         var html = this.renderHTML(args, outputs, self);
 
         var root;
-        if (parent.nodeType == Node.ELEMENT_NODE)
+        if (parent.nodeType === Node.ELEMENT_NODE)
         {
             parent.innerHTML = html;
             root = parent.firstChild;
         }
         else
         {
-            if (!parent || parent.nodeType != Node.DOCUMENT_NODE)
+            if (!parent || parent.nodeType !== Node.DOCUMENT_NODE)
                 parent = document;
 
-            if (!womb || womb.ownerDocument != parent)
+            if (!womb || womb.ownerDocument !== parent)
                 womb = parent.createElement("div");
             womb.innerHTML = html;
 
@@ -1268,7 +1277,7 @@ var Renderer =
         if (FBTrace.DBG_DOMPLATE)
             FBTrace.sysout("domplate.append html: "+html+"\n");
 
-        if (!womb || womb.ownerDocument != parent.ownerDocument)
+        if (!womb || womb.ownerDocument !== parent.ownerDocument)
             womb = parent.ownerDocument.createElement("div");
         womb.innerHTML = html;
 
@@ -1301,7 +1310,7 @@ function defineTags()
 
         // xxxHonza: Domplate is injected into FBL namespace only for backward
         // compatibility with extensions.
-        Domplate[fnName] = FBL[fnName]= fn;
+        Domplate[fnName] = FBL[fnName] = fn;
     }
 
     function createTagHandler(tagName)

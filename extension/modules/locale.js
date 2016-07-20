@@ -1,5 +1,7 @@
 /* See license.txt for terms of usage */
 
+/* global Cu, Services, PrefLoader, FBTrace, Cc, DEFAULT_LOCALE, Ci, PluralForm */
+
 // ********************************************************************************************* //
 // Constants
 
